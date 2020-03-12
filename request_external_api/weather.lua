@@ -4,9 +4,12 @@ local json = require "json"
 
 local CMD = {}
 
-CMD.getweather = function ()
+-- cityid
+-- 101010100 北京
+-- 101200101 武汉
+CMD.getweather = function (cityid)
     local host = "http://www.weather.com.cn"
-    local uri = "/data/sk/101010100.html"
+    local uri = "/data/sk/"..cityid..".html"
     
     httpc.timeout = 100
     httpc.dns()
