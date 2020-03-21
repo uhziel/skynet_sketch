@@ -1,12 +1,14 @@
-CC ?= gcc
 LUA_INC ?= ../skynet/3rd/lua
-CFLAGS = -g -O2 -Wall -I$(LUA_INC)
+CFLAGS = -g -O0 -Wall -I$(LUA_INC)
 SHARED := -fPIC -dynamiclib -Wl,-undefined,dynamic_lookup
 
-all: netpackh5.so
+all: netpackh5.so hproto.so
 
 netpackh5.so: lua-netpackh5.c
-	$(CC) $(CFLAGS) $(SHARED) $^ -o $@ -I../skynet/skynet-src
+	clang $(CFLAGS) $(SHARED) $^ -o $@ -I../skynet/skynet-src
+
+hproto.so: hproto.cpp
+	clang++ $(CFLAGS) $(SHARED) $^ -o $@
 
 clean:
-	rm netpackh5.so
+	rm netpackh5.so hproto.so
