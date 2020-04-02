@@ -3,7 +3,21 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define HASH_LENGTH 4
 #define BUF_SIZE 1024
+
+//a = hproto.encode({m_id=26042, m_flags=1, m_trans_id=10, m_account_id=101, m_client_ip="192.168.1.133"})
+//a = hproto.encode({m_id=26043, m_flags=1, m_trans_id=11, m_account_id=102, m_result=106, m_tag_black_level=11, m_common_credit_score=7})
+
+enum EventID {
+    NET_PING = 1,
+    NET_PONG = 2,
+    NET_SYSTEM_END = 100,
+    CLSID_CEventQueryCommonCredit = 26042,
+    CLSID_CEventQueryCommonCreditRes = 26043,
+    CLSID_CEventThemeChatGMDestory = 56830,
+    CLSID_CEventThemeChatGMDestoryRes = 56831,
+};
 
 struct Stream
 {   
@@ -11,6 +25,7 @@ struct Stream
     {
         this->buf = (char*)malloc(BUF_SIZE);
         memset(this->buf, 0, BUF_SIZE);
+        this->size += HASH_LENGTH;
     }
 
     ~Stream()
@@ -37,6 +52,14 @@ struct ReadStream
     size_t pos;
     const char *buf;
 
+    bool CheckHash()
+    {
+        int hash = 0;
+        Read(&hash, sizeof(hash));
+        //TODO check hash
+        return true;
+    }
+
     void Read(void* dest, size_t len)
     {
         memcpy(dest, this->buf+pos, len);
@@ -62,22 +85,63 @@ ldecode_int(lua_State *L, const char* key, ReadStream *stream) {
     lua_settable(L, -3);
 }
 
-static void
+static short
 lencode_short(lua_State *L, int index, const char* key, Stream *stream) {
     lua_pushstring(L, key);
     lua_gettable(L, index);
     short v = (short)lua_tointeger(L, -1);  //write
     stream->Copy(&v, sizeof(v));
     lua_pop(L, 1);
+    return v;
 }
 
-static void
+static short
 ldecode_short(lua_State *L, const char* key, ReadStream *stream) {
     short v = 0;
     stream->Read(&v, sizeof(v));
     lua_pushstring(L, key);
     lua_pushinteger(L, v);
     lua_settable(L, -3);
+    return v;
+}
+
+static unsigned short
+lencode_ushort(lua_State *L, int index, const char* key, Stream *stream) {
+    lua_pushstring(L, key);
+    lua_gettable(L, index);
+    unsigned short v = (unsigned short)lua_tointeger(L, -1);  //write
+    stream->Copy(&v, sizeof(v));
+    lua_pop(L, 1);
+    return v;
+}
+
+static unsigned short
+ldecode_ushort(lua_State *L, const char* key, ReadStream *stream) {
+    unsigned short v = 0;
+    stream->Read(&v, sizeof(v));
+    lua_pushstring(L, key);
+    lua_pushinteger(L, v);
+    lua_settable(L, -3);
+    return v;
+}
+
+static void
+lencode_long(lua_State *L, int index, const char* key, Stream *stream) {
+    lua_pushstring(L, key);
+    lua_gettable(L, index);
+    long long v = (long long)lua_tointeger(L, -1);  //write
+    stream->Copy(&v, sizeof(v));
+    lua_pop(L, 1);
+}
+
+static long long
+ldecode_long(lua_State *L, const char* key, ReadStream *stream) {
+    long long v = 0;
+    stream->Read(&v, sizeof(v));
+    lua_pushstring(L, key);
+    lua_pushinteger(L, v);
+    lua_settable(L, -3);
+    return v;
 }
 
 static void
@@ -122,19 +186,22 @@ lencode_cstring(lua_State *L, int index, const char* key, Stream *stream) {
     lua_gettable(L, index);
     size_t len = 0;
     const char* v = lua_tolstring(L, -1, &len);  //write
-    stream->Copy(&len, sizeof(len));
-    stream->Copy((void*)v, len);
+    int tmp = (int)(len);
+    stream->Copy(&tmp, sizeof(tmp));
+    stream->Copy((void*)v, tmp);
+    char c = '\0';
+    stream->Copy(&c, sizeof(c));
     lua_pop(L, 1);
 }
 
 static void
 ldecode_cstring(lua_State *L, const char* key, ReadStream *stream) {
-    size_t len = 0;
+    int len = 0;
     stream->Read(&len, sizeof(len));
     
     lua_pushstring(L, key);
     lua_pushlstring(L, stream->buf+stream->pos, len);
-    stream->pos += len;
+    stream->pos += (len+1); //加1是因为尾部用’\0‘做结尾但是没算在字符串长度里
     lua_settable(L, -3);
 }
 
@@ -228,20 +295,95 @@ ldecode_human(lua_State *L, ReadStream* stream) {
     ldecode_vector(L, "parts", stream);
 }
 
+static unsigned short
+lencode_ev(lua_State *L, int index, Stream *stream) {
+    unsigned short id = lencode_ushort(L, index, "m_id", stream);
+    if (id > NET_SYSTEM_END) {
+        lencode_ushort(L, index, "m_flags", stream);
+    }
+
+    if (id == CLSID_CEventQueryCommonCredit) {
+        lencode_long(L, index, "m_trans_id", stream);
+        lencode_long(L, index, "m_account_id", stream);
+        lencode_string(L, index, "m_client_ip", stream);
+        return 0;
+    } else if (id == CLSID_CEventQueryCommonCreditRes) {
+        lencode_long(L, index, "m_trans_id", stream);
+        lencode_long(L, index, "m_account_id", stream);
+        lencode_int(L, index, "m_result", stream);
+        lencode_int(L, index, "m_tag_black_level", stream);
+        lencode_int(L, index, "m_common_credit_score", stream);
+        return 0;
+    } else if (id == NET_PING) {
+        lencode_int(L, index, "m_tick", stream);
+        lencode_int(L, index, "m_ping", stream);
+        return 0;
+    } else if (id == NET_PONG) {
+        lencode_int(L, index, "m_tick", stream);
+        return 0;
+    }
+    else {
+        return id;
+    }
+}
+
+static unsigned short
+ldecode_ev(lua_State *L, ReadStream* stream) {
+    lua_newtable(L);
+
+    unsigned short id = ldecode_ushort(L, "m_id", stream);
+    if (id > NET_SYSTEM_END) {
+        ldecode_ushort(L, "m_flags", stream);
+    }
+
+    if (id == CLSID_CEventQueryCommonCredit) {
+        ldecode_long(L, "m_trans_id", stream);
+        ldecode_long(L, "m_account_id", stream);
+        ldecode_string(L, "m_client_ip", stream);
+        return 0;
+    } else if (id == CLSID_CEventQueryCommonCreditRes) {
+        ldecode_long(L, "m_trans_id", stream);
+        ldecode_long(L, "m_account_id", stream);
+        ldecode_int(L, "m_result", stream);
+        ldecode_int(L, "m_tag_black_level", stream);
+        ldecode_int(L, "m_common_credit_score", stream);
+        return 0;   
+    } else if (id == CLSID_CEventThemeChatGMDestory) {
+        ldecode_string(L, "m_name", stream);
+        ldecode_short(L, "m_trans_id", stream);
+        return 0;   
+    } else if (id == NET_PING) {
+        ldecode_int(L, "m_tick", stream);
+        ldecode_int(L, "m_ping", stream); 
+        return 0;
+    } else if (id == NET_PONG) {
+        ldecode_int(L, "m_tick", stream);
+        return 0;
+    }
+    else
+    {
+        lua_pop(L, 1);
+        return id;
+    }
+}
+
 static int
 lencode(lua_State *L) { /* lua table -> buf*/
-	lua_Number tmp = lua_tonumber(L, 1);
-    int type = 0;
-    lua_numbertointeger(tmp, &type);
-    int istable = lua_istable(L, 2);
+    int istable = lua_istable(L, 1);
     if (istable == 0) {
         lua_pushnil(L);
-        lua_pushliteral(L, "arg #2 must be table.");
+        lua_pushliteral(L, "arg #1 must be table.");
         return 2;
     }
 
     Stream stream;
-    lencode_human(L, 2, &stream);
+    int result = lencode_ev(L, 1, &stream);
+    if (result > 0) {
+        lua_pushnil(L);
+		lua_pushfstring(L, "cannot encode event. clsid:%d.", result);      
+        return 2;
+    }
+
     lua_pushlstring(L, stream.buf, stream.size);
 	return 1;
 }
@@ -257,7 +399,17 @@ ldecode(lua_State *L) { /* buf -> lua table */
 	}
 
     ReadStream stream(size, ptr);
-    ldecode_human(L, &stream);
+    if (!stream.CheckHash()) {
+        lua_pushnil(L);
+		lua_pushliteral(L, "check hash fail.");
+        return 2;
+    }
+    int result = ldecode_ev(L, &stream);
+    if (result > 0) {
+        lua_pushnil(L);
+		lua_pushfstring(L, "cannot decode event. clsid:%d.", result);
+        return 2;
+    }
     
 	return 1;
 }

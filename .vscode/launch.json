@@ -5,11 +5,28 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "(lldb) Launch main_x51",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/skynet/skynet",
+            "args": [
+                "../netpack/config_x51"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/skynet",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "lldb"
+        },
+        {
             "name": "(lldb) Launch lua",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/skynet/3rd/lua/lua",
-            "args": ["-l", "hproto"],
+            "args": [
+                "-l",
+                "hproto"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/netpack",
             "environment": [],
