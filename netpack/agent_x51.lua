@@ -94,11 +94,8 @@ skynet.register_protocol {
 			skynet.error("CS_ESTABLISHED client_fd:", client_fd)
 		elseif cur_conn_state == ConnState.CS_ESTABLISHED then
 			if ev == nil then
-				skynet.error("recv decode fail. reason:", reason)
+				skynet.error("agent recv decode fail. reason:", reason)
 				return
-			end
-			for k,v in pairs(ev) do
-				skynet.error("recv ", k, ":", v)
 			end
 			local res_ev = {}
 			if ev.m_id == EventName.NET_PING then

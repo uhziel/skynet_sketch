@@ -9,7 +9,7 @@ skynet.start(function()
 	if not skynet.getenv "daemon" then
 		local console = skynet.newservice("console")
 	end
-	skynet.newservice("debug_console",8000)
+	skynet.newservice("debug_console_x51",8000)
 	local watchdog = skynet.newservice("watchdog_x51")
 	skynet.call(watchdog, "lua", "start", {
 		port = listen_port,
