@@ -140,6 +140,7 @@ local function load_test_once(count)
 end
 
 local function load_test(count, duration, interval)
+    skynet.sleep(100)
     for i = 1, duration, interval do
         load_test_once(count)
         skynet.sleep(interval*100)

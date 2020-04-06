@@ -13,6 +13,7 @@ local peer_pid --对方的进程id
 local peer_mid --对方的机器id
 local cur_conn_state --当前conn的状态
 local last_ping
+local common_credit_service
 
 local ConnCmd = {
 	CCMD_PUZZLE = 1,
@@ -105,13 +106,7 @@ skynet.register_protocol {
 				last_ping = ev.m_ping
 				send_event(res_ev)
 			elseif ev.m_id == 26042 then -- CLSID_CEventQueryCommonCreditRes
-				res_ev.m_id = 26043 -- CLSID_CEventQueryCommonCreditRes
-				res_ev.m_flags = 0
-				res_ev.m_trans_id = ev.m_trans_id
-				res_ev.m_account_id = ev.m_account_id
-				res_ev.m_result = 1
-				res_ev.m_tag_black_level = 5
-				res_ev.m_common_credit_score = 110
+				local res_ev = skynet.call(common_credit_service, "lua", "query", ev)
 				send_event(res_ev)
 			end
 		end
@@ -136,6 +131,11 @@ function CMD.disconnect()
 	-- todo: do something before exit
 	skynet.exit()
 end
+
+skynet.init(function()
+	common_credit_service = skynet.queryservice("common_credit_x51")
+	skynet.error("common_credit_service:", common_credit_service)
+end)
 
 skynet.start(function()
 	skynet.dispatch("lua", function(_,_, command, ...)

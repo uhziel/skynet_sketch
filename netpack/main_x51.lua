@@ -17,5 +17,6 @@ skynet.start(function()
 		nodelay = true,
 	})
 	skynet.error("Watchdog listen on", listen_port)
+	skynet.uniqueservice("common_credit_x51")
 	skynet.exit()
 end)
