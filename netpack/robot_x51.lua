@@ -160,7 +160,7 @@ local CMD = {}
 -- duration 总持续时间 单位：s
 -- interval 每次间隔多长时间 单位:s
 function CMD.load_test(count, duration, interval)
-    build_conn("localhost", 26667)
+    build_conn("127.0.0.1", 26667)
     skynet.fork(load_test, count, duration, interval)
     skynet.fork(recv_ev)
     return "start load_test count:"..count.." duration:"..duration.." interval:"..interval

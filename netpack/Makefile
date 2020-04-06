@@ -21,7 +21,7 @@ linux : CC := gcc
 linux : CCP := g++
 
 LUA_INC ?= ../skynet/3rd/lua
-CFLAGS = -g -O0 -Wall -I$(LUA_INC)
+CFLAGS = -std=c11 -g -O0 -Wall -I$(LUA_INC)
 
 linux macosx:
 	$(MAKE) all PLAT=$@ SHARED="$(SHARED)" CC="$(CC)" CCP="$(CCP)" CFLAGS="$(CFLAGS)"
