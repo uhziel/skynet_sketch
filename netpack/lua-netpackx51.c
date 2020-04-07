@@ -293,7 +293,7 @@ filter_data_(lua_State *L, int fd, uint8_t * buffer, int size) {
 		buffer+=SIZEOF_LENGTH;
 		size-=SIZEOF_LENGTH;
 
-		printf("lua-netpackx51.c left_buffer_size:%d pack_content_size:%d\n", size, pack_size);
+		//printf("lua-netpackx51.c left_buffer_size:%d pack_content_size:%d\n", size, pack_size);
 		if (size < pack_size) {
 			struct uncomplete * uc = save_uncomplete(L, fd);
 			uc->read = size;

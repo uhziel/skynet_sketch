@@ -19,3 +19,6 @@ bootstrap = "snlua bootstrap"	-- The service for bootstrap
 -- snax_interface_g = "snax_g"
 cpath = root.."cservice/?.so"
 -- daemon = "./skynet.pid"
+
+-- common_credit_x51
+ccx_host = "127.0.0.1:8082"

@@ -4,16 +4,17 @@ local json = require "json"
 
 local CMD = {}
 
-local host = "127.0.0.1:8082"
+local host
 local uri = "/cgi-bin/auth/query_common_credit"
 
 skynet.init(function()
     httpc.timeout=100
     httpc.dns()
+    host = skynet.getenv("ccx_host")
 end)
 
 function CMD.query(ev)
-    skynet.error("CMD.query")
+    --skynet.error("CMD.query")
     local res_ev = {}
 
     res_ev.m_id = 26043 -- CLSID_CEventQueryCommonCreditRes
@@ -23,7 +24,7 @@ function CMD.query(ev)
     if status ~= 200 then
         res_ev.m_result = 1
     else
-        skynet.error("body:", body)
+        --skynet.error("body:", body)
         local result = json.decode(body)
         res_ev.m_trans_id = ev.m_trans_id
         res_ev.m_account_id = ev.m_account_id
@@ -37,7 +38,7 @@ end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(_,_, command, ...)
-		skynet.trace()
+		--skynet.trace()
 		local f = CMD[command]
 		skynet.ret(skynet.pack(f(...)))
 	end)

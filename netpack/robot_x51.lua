@@ -39,6 +39,9 @@ local session = 0
 local last = ""
 local cur_conn_state = ConnState.CS_FRESH_PUNCH
 
+local recv_succ_count = 0
+local recv_fail_count = 0
+
 local function print_request(session, ev)
 	skynet.error("------REQUEST----- session:", session)
 	for k,v in pairs(ev) do
@@ -62,14 +65,14 @@ local function send_ev(ev)
 	local stream = hproto.encode(ev)
 	send_pack(stream)
 	session = session + 1
-	print_request(session, ev)
+	--print_request(session, ev)
 end
 
 local function send_cmd(cmd)
 	local stream = cmdproto.encode(cmd)
 	send_pack(stream)
-	session = session + 1
-	print_request(session, cmd)
+	--session = session + 1
+	--print_request(session, cmd)
 end
 
 local function unpack_package(text)
@@ -112,7 +115,7 @@ local function dispatch_package()
 		if cur_conn_state ~= ConnState.CS_ESTABLISHED then
 			local cmd = cmdproto.decode(v)
 			if cmd then
-				print_response(cmd)
+				--print_response(cmd)
 				if cmd.cmd_id == ConnCmd.CCMD_SERVER_DATA then
 					conn_id = cmd.conn_id
 					cur_conn_state = ConnState.CS_ESTABLISHED 
@@ -120,7 +123,12 @@ local function dispatch_package()
 			end
 		else
 			local res_ev = hproto.decode(v)
-			print_response(res_ev)
+			if res_ev.m_result == 0 then
+				recv_succ_count = recv_succ_count + 1
+			else
+				recv_fail_count = recv_fail_count + 1
+			end
+			--print_response(res_ev)
 		end
 		
 	end
@@ -132,7 +140,7 @@ local function build_conn(host, port)
 end
 
 local function load_test_once(count)
-    skynet.error("load_test_once count:", count)
+    --skynet.error("load_test_once count:", count)
 
     for i = 1, count do
 		send_ev({m_id=26042, m_flags=1, m_trans_id=session, m_account_id=101, m_client_ip="192.168.1.133"})
@@ -144,9 +152,9 @@ local function load_test(count, duration, interval)
     for i = 1, duration, interval do
         load_test_once(count)
         skynet.sleep(interval*100)
-    end
-    skynet.error("end load_test")
-    skynet.exit()
+	end
+    skynet.error("end load_test request_count:", session, " succ_count:", recv_succ_count, " fail_count:", recv_fail_count)
+    --skynet.exit()
 end
 
 local function recv_ev()
@@ -169,7 +177,7 @@ end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(_,_, command, ...)
-		skynet.trace()
+		--skynet.trace()
 		local f = CMD[command]
 		skynet.ret(skynet.pack(f(...)))
 	end)

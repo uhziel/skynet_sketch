@@ -78,7 +78,7 @@ skynet.register_protocol {
 		assert(fd == client_fd)	-- You can use fd to reply message
 		skynet.ignoreret()	-- session is fd, don't call skynet.ret
 		--skynet.trace()
-		skynet.error("ev:", ev, " reason:", reason)
+		--skynet.error("ev:", ev, " reason:", reason)
 
 		if cur_conn_state == ConnState.CS_FRESH_PUNCH and ev.cmd_id == ConnCmd.CCMD_PUNCH then
 			skynet.error("cmdproto cmd_id:", ev.cmd_id, " pid:", ev.peer_pid, " mid:", ev.peer_mid)
@@ -139,7 +139,7 @@ end)
 
 skynet.start(function()
 	skynet.dispatch("lua", function(_,_, command, ...)
-		skynet.trace()
+		--skynet.trace()
 		local f = CMD[command]
 		skynet.ret(skynet.pack(f(...)))
 	end)

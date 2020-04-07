@@ -30,7 +30,7 @@ function cmdproto.decode(buf)
         cmd.peer_pid, cmd.peer_mid = string.unpack("!1<i8i8", buf, unread_pos)
         return cmd
     elseif cmd.cmd_id == ConnCmd.CCMD_SERVER_DATA then
-        print("the size of buf:", #buf)
+        --print("the size of buf:", #buf)
         cmd.conn_id, cmd.peer_pid, cmd.peer_mid = string.unpack("!1<i8i8i8", buf, unread_pos)
         return cmd
     else
