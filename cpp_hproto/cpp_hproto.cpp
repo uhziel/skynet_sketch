@@ -42,7 +42,8 @@ class Class2LuaScraper
 {
 public:
   explicit Class2LuaScraper(ASTContext *Context)
-    : Context(Context) {}
+    : Context(Context)
+    , policy(options) {}
   bool ScrapeTranslationUnitDecl(TranslationUnitDecl* Decl)
   {
     return ScrapeDeclContext(Decl);
@@ -90,6 +91,10 @@ public:
     {
       return false;
     }
+    if (decl->getQualifiedNameAsString() == "Human")
+    {
+      decl->dumpColor();
+    }
     const clang::Type* type = decl->getTypeForDecl();
     llvm::outs() << "CXXRecordDecl " << decl->getQualifiedNameAsString()
       << " typeClass:" << type->getTypeClassName()
@@ -104,9 +109,10 @@ public:
   {
     QualType qual_type = decl->getType(); //from ValueDecl::getType()
     const clang::Type* type = qual_type.getTypePtr();
-    
+
     llvm::outs() << "FieldDecl " << decl->getQualifiedNameAsString()
       << " typeClass:(" << type->getTypeClass() << "," << type->getTypeClassName()
+      << " type:" << QualType::getAsString(qual_type.split(), policy)
       << ")\n";
     return true;
   }
@@ -142,6 +148,8 @@ public:
 
 private:
   ASTContext *Context;
+  LangOptions options;
+  PrintingPolicy policy;
 };
 
 class Class2LuaConsumer : public clang::ASTConsumer {
