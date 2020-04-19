@@ -22,6 +22,7 @@ linux : CCP := g++
 
 LUA_INC ?= ../skynet/3rd/lua
 CFLAGS = -std=c11 -g -O0 -Wall -I$(LUA_INC)
+CCPFLAGS = -std=c++11 -g -O0 -Wall -I$(LUA_INC)
 
 linux macosx:
 	$(MAKE) all PLAT=$@ SHARED="$(SHARED)" CC="$(CC)" CCP="$(CCP)" CFLAGS="$(CFLAGS)"
@@ -34,8 +35,8 @@ netpackx51.so: lua-netpackx51.c
 netpackh5.so: lua-netpackh5.c
 	$(CC) $(CFLAGS) $(SHARED) $^ -o $@ -I../skynet/skynet-src
 
-hproto.so: hproto.cpp
-	$(CCP) $(CFLAGS) $(SHARED) $^ -o $@
+hproto.so: hproto.cpp cpp_hproto_utils.cpp
+	$(CCP) $(CCPFLAGS) $(SHARED) $^ -o $@
 
 clean:
 	rm netpackh5.so netpackx51.so hproto.so
