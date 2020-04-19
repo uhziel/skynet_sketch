@@ -1,116 +1,17 @@
-#include "cpp_hproto_utils.h"
-
+#include "generated_hproto.h"
 //a = hproto.encode({m_id=26042, m_flags=1, m_trans_id=10, m_account_id=101, m_client_ip="192.168.1.133"})
 //a = hproto.encode({m_id=26043, m_flags=1, m_trans_id=11, m_account_id=102, m_result=106, m_tag_black_level=11, m_common_credit_score=7})
 
 enum EventID {
     NET_PING = 1,
     NET_PONG = 2,
+    CLSID_Human = 99,
     NET_SYSTEM_END = 100,
     CLSID_CEventQueryCommonCredit = 26042,
     CLSID_CEventQueryCommonCreditRes = 26043,
     CLSID_CEventThemeChatGMDestory = 56830,
     CLSID_CEventThemeChatGMDestoryRes = 56831,
 };
-
-static void
-lencode_bodypart(lua_State *L, int index, Stream *stream) {
-    lencode_int(L, index, "type", stream);
-    lencode_float(L, index, "weight", stream);
-}
-
-static void
-lencode_bodypart(lua_State *L, int index, const char* key, Stream *stream) {
-    lua_pushstring(L, key);
-    lua_gettable(L, index);
-
-    lencode_bodypart(L, index, stream);
-
-    lua_pop(L, 1);
-}
-
-static void
-ldecode_bodypart(lua_State *L, ReadStream *stream) {
-    lua_newtable(L);
-
-    ldecode_int(L, "type", stream);
-    ldecode_float(L, "weight", stream);
-}
-
-static void
-ldecode_bodypart(lua_State *L, const char* key, ReadStream *stream) {
-    lua_pushstring(L, key);
-
-    ldecode_bodypart(L, stream);
-
-    lua_settable(L, -3);
-}
-
-static void
-lencode_vector_bodypart(lua_State *L, int index, const char* key, Stream *stream) {
-    lua_pushstring(L, key);
-    lua_gettable(L, index);
-
-    lua_Integer size = 0;
-    if (lua_istable(L, -1))
-    {
-        lua_len(L, -1);
-        size = lua_tointeger(L, -1);
-        lua_pop(L, 1);
-    }
-
-    stream->Copy(&size, sizeof(size));
-    for (lua_Integer i = 1; i <= size; i++) {
-        lua_pushinteger(L, i);
-        lua_gettable(L, -2);
-
-        lencode_bodypart(L, lua_gettop(L), stream);
-
-        lua_pop(L, 1);
-    }
-
-    lua_pop(L, 1);
-}
-
-static void
-ldecode_vector_bodypart(lua_State *L, const char* key, ReadStream *stream) {
-    lua_Integer size = 0;
-    stream->Read(&size, sizeof(size));
-
-    lua_pushstring(L, key);
-    lua_createtable(L, size, 0);
-    for (lua_Integer i = 1; i <= size; i++) {
-        lua_pushinteger(L, i);
-
-        ldecode_bodypart(L, stream);
-        
-        lua_settable(L, -3);
-    }    
-
-    lua_settable(L, -3);
-}
-
-static void
-lencode_human(lua_State *L, int index, Stream *stream) {
-    lencode_int(L, index, "id", stream);
-    lencode_short(L, index, "age", stream);
-    lencode_bool(L, index, "male", stream);
-    lencode_string(L, index, "name", stream);
-    lencode_string(L, index, "description", stream);
-    lencode_vector_bodypart(L, index, "parts", stream);
-}
-
-static void
-ldecode_human(lua_State *L, ReadStream* stream) {
-    lua_newtable(L);
-
-    ldecode_int(L, "id", stream);
-    ldecode_short(L, "age", stream);
-    ldecode_bool(L, "male", stream);
-    ldecode_string(L, "name", stream);
-    ldecode_string(L, "description", stream);
-    ldecode_vector_bodypart(L, "parts", stream);
-}
 
 static unsigned short
 lencode_ev(lua_State *L, int index, Stream *stream) {
@@ -137,6 +38,9 @@ lencode_ev(lua_State *L, int index, Stream *stream) {
         return 0;
     } else if (id == NET_PONG) {
         lencode_int(L, index, "m_tick", stream);
+        return 0;
+    } else if (id == CLSID_Human) {
+        lencode_Human(L, index, stream);
         return 0;
     }
     else {
@@ -175,6 +79,9 @@ ldecode_ev(lua_State *L, ReadStream* stream) {
         return 0;
     } else if (id == NET_PONG) {
         ldecode_int(L, "m_tick", stream);
+        return 0;
+    } else if (id == CLSID_Human) {
+        ldecode_Human(L, stream);
         return 0;
     }
     else
@@ -232,7 +139,7 @@ ldecode(lua_State *L) { /* buf -> lua table */
 }
 
 /*
-hproto.encode(1, {id=1,age=2,male=true,name="zhulei",description="ooo",parts={{type=1,weight=2.0}, {type=2, weight=3.0}}})
+hproto.encode({m_id=99,id=1,age=2,male=true,name="zhulei",description="ooo",parts={{type=1,weight=2.0}, {type=2, weight=3.0}}})
 */
 
 extern "C" {
