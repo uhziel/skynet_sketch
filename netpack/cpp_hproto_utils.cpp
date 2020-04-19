@@ -40,17 +40,21 @@ void lencode_int(lua_State *L, int index, const char *key, Stream *stream)
 {
     lua_pushstring(L, key);
     lua_gettable(L, index);
+
     int v = (int)lua_tointeger(L, -1); //write
     stream->Copy(&v, sizeof(v));
+
     lua_pop(L, 1);
 }
 
 void ldecode_int(lua_State *L, const char *key, ReadStream *stream)
 {
+    lua_pushstring(L, key);
+
     int v = 0;
     stream->Read(&v, sizeof(v));
-    lua_pushstring(L, key);
     lua_pushinteger(L, v);
+
     lua_settable(L, -3);
 }
 
@@ -149,7 +153,7 @@ void ldecode_float(lua_State *L, const char *key, ReadStream *stream)
     lua_settable(L, -3);
 }
 
-void lencode_cstring(lua_State *L, int index, const char *key, Stream *stream)
+void lencode_string(lua_State *L, int index, const char *key, Stream *stream)
 {
     lua_pushstring(L, key);
     lua_gettable(L, index);
@@ -163,7 +167,7 @@ void lencode_cstring(lua_State *L, int index, const char *key, Stream *stream)
     lua_pop(L, 1);
 }
 
-void ldecode_cstring(lua_State *L, const char *key, ReadStream *stream)
+void ldecode_string(lua_State *L, const char *key, ReadStream *stream)
 {
     int len = 0;
     stream->Read(&len, sizeof(len));

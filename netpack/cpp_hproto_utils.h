@@ -50,15 +50,5 @@ void ldecode_bool(lua_State *L, const char *key, ReadStream *stream);
 void lencode_float(lua_State *L, int index, const char *key, Stream *stream);
 void ldecode_float(lua_State *L, const char *key, ReadStream *stream);
 
-void lencode_cstring(lua_State *L, int index, const char *key, Stream *stream);
-void ldecode_cstring(lua_State *L, const char *key, ReadStream *stream);
-
-inline void lencode_string(lua_State *L, int index, const char *key, Stream *stream)
-{
-    lencode_cstring(L, index, key, stream);
-}
-
-inline void ldecode_string(lua_State *L, const char *key, ReadStream *stream)
-{
-    ldecode_cstring(L, key, stream);
-}
+void lencode_string(lua_State *L, int index, const char *key, Stream *stream);
+void ldecode_string(lua_State *L, const char *key, ReadStream *stream);

@@ -20,6 +20,16 @@ lencode_bodypart(lua_State *L, int index, Stream *stream) {
 }
 
 static void
+lencode_bodypart(lua_State *L, int index, const char* key, Stream *stream) {
+    lua_pushstring(L, key);
+    lua_gettable(L, index);
+
+    lencode_bodypart(L, index, stream);
+
+    lua_pop(L, 1);
+}
+
+static void
 ldecode_bodypart(lua_State *L, ReadStream *stream) {
     lua_newtable(L);
 
@@ -28,7 +38,16 @@ ldecode_bodypart(lua_State *L, ReadStream *stream) {
 }
 
 static void
-lencode_vector(lua_State *L, int index, const char* key, Stream *stream) {
+ldecode_bodypart(lua_State *L, const char* key, ReadStream *stream) {
+    lua_pushstring(L, key);
+
+    ldecode_bodypart(L, stream);
+
+    lua_settable(L, -3);
+}
+
+static void
+lencode_vector_bodypart(lua_State *L, int index, const char* key, Stream *stream) {
     lua_pushstring(L, key);
     lua_gettable(L, index);
 
@@ -54,7 +73,7 @@ lencode_vector(lua_State *L, int index, const char* key, Stream *stream) {
 }
 
 static void
-ldecode_vector(lua_State *L, const char* key, ReadStream *stream) {
+ldecode_vector_bodypart(lua_State *L, const char* key, ReadStream *stream) {
     lua_Integer size = 0;
     stream->Read(&size, sizeof(size));
 
@@ -76,9 +95,9 @@ lencode_human(lua_State *L, int index, Stream *stream) {
     lencode_int(L, index, "id", stream);
     lencode_short(L, index, "age", stream);
     lencode_bool(L, index, "male", stream);
-    lencode_cstring(L, index, "name", stream);
+    lencode_string(L, index, "name", stream);
     lencode_string(L, index, "description", stream);
-    lencode_vector(L, index, "parts", stream);
+    lencode_vector_bodypart(L, index, "parts", stream);
 }
 
 static void
@@ -88,9 +107,9 @@ ldecode_human(lua_State *L, ReadStream* stream) {
     ldecode_int(L, "id", stream);
     ldecode_short(L, "age", stream);
     ldecode_bool(L, "male", stream);
-    ldecode_cstring(L, "name", stream);
+    ldecode_string(L, "name", stream);
     ldecode_string(L, "description", stream);
-    ldecode_vector(L, "parts", stream);
+    ldecode_vector_bodypart(L, "parts", stream);
 }
 
 static unsigned short
