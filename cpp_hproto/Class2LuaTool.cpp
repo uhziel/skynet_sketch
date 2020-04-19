@@ -9,7 +9,7 @@ public:
   explicit Class2LuaConsumer(Class2LuaScraper *Scraper) : Scraper(Scraper) {}
 
   virtual void HandleTranslationUnit(clang::ASTContext &Context) {
-    Scraper->ScrapeTranslationUnitDecl(Context.getTranslationUnitDecl());
+    Scraper->scrapeTranslationUnitDecl(Context.getTranslationUnitDecl());
   }
 
 private:
@@ -21,7 +21,7 @@ public:
   Class2LuaAction(Class2LuaScraper *Scraper) : Scraper(Scraper) {}
   virtual std::unique_ptr<clang::ASTConsumer>
   CreateASTConsumer(clang::CompilerInstance &Compiler, llvm::StringRef InFile) {
-    Scraper->SetContext(&Compiler.getASTContext());
+    Scraper->setContext(&Compiler.getASTContext());
     return std::unique_ptr<clang::ASTConsumer>(
         new Class2LuaConsumer(Scraper)
     );

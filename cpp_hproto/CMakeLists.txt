@@ -6,6 +6,8 @@ add_clang_executable(cpp_hproto
   Class2LuaTool.cpp
   Class2LuaScraper.h
   Class2LuaScraper.cpp
+  RecordsDatabase.h
+  RecordsDatabase.cpp
 )
 
 target_link_libraries(cpp_hproto
