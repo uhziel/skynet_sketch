@@ -24,6 +24,7 @@ struct BodyPart
 struct Human;
 
 typedef BodyPart Foo;
+typedef std::vector<BodyPart> BodyPartVec;
 
 struct Human {
     Human() : id(0*1), age(0), male(false) {}
@@ -32,9 +33,10 @@ struct Human {
     short age;
     bool male;
     char name[MAX_NAME_LENGTH];
-    string description;
-    vector<BodyPart> parts;
+    std::string description;
+    std::vector<::BodyPart> parts;
+    BodyPartVec parts2;
     //struct ::BodyPart part1;
-    //Foo part1;
+    Foo part1;
 };
 int foobar;

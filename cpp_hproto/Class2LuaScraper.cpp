@@ -53,6 +53,9 @@ void Class2LuaScraper::scrapeCXXRecordDecl(clang::CXXRecordDecl *decl) {
 
   RecordInfo Info;
   Info.RecordTypeName = decl->getQualifiedNameAsString();
+  if (Database.hasRecord(Info.RecordTypeName)) {
+    return;
+  }
 
   const clang::Type *type = decl->getTypeForDecl();
   llvm::outs() << "CXXRecordDecl " << decl->getQualifiedNameAsString()
@@ -72,9 +75,8 @@ void Class2LuaScraper::scrapeFieldDecl(clang::FieldDecl *decl, RecordInfo& Out) 
   scrapeSubType(qual_type);
 
   FieldTypeInfo Info;
-  Info.Kind = static_cast<TypeKind>(type->getTypeClass());
   Info.VarName = decl->getNameAsString();
-  Info.VarTypeName = QualType::getAsString(qual_type.split(), Policy);
+  parseFieldType(CanonicalQT, Info);
   Out.TypeInfos.push_back(Info);
 
   llvm::outs() << "FieldDecl " << decl->getNameAsString()
@@ -114,6 +116,8 @@ void Class2LuaScraper::scrapeSubType(QualType QT) {
     {
       const clang::TypedefType *TT = type->getAs<clang::TypedefType>();
       QualType DesugarQT = TT->desugar();
+      llvm::outs() << "scrapeSubType Typedef origin:" << QualType::getAsString(QT.split(), Policy)
+        << " -> desugar:" << QualType::getAsString(DesugarQT.split(), Policy) << "\n";
       scrapeSubType(DesugarQT);
     }
     break;
@@ -121,10 +125,38 @@ void Class2LuaScraper::scrapeSubType(QualType QT) {
     {
       const clang::ElaboratedType *ET = type->getAs<clang::ElaboratedType>();
       QualType DesugarQT = ET->desugar();
+      llvm::outs() << "scrapeSubType Elaborated origin:" << QualType::getAsString(QT.split(), Policy)
+        << " -> desugar:" << QualType::getAsString(DesugarQT.split(), Policy) << "\n";
       scrapeSubType(DesugarQT);
     }
     break;
   default:
     break;
   }
+}
+
+void Class2LuaScraper::parseFieldType(QualType CanonicalQT, FieldTypeInfo &Out) {
+  const clang::Type *CanonicalType = CanonicalQT.getTypePtr();
+  std::string TypeName = QualType::getAsString(CanonicalQT.split(), Policy);
+  if (CanonicalType->getTypeClass() == clang::Type::TypeClass::Builtin) {
+    Out.Kind = TK_Builtin;
+    Out.VarTypeName = TypeName;
+  } else if (CanonicalType->getTypeClass() == clang::Type::TypeClass::ConstantArray)
+  {
+    if (TypeName.find("char") != std::string::npos) {
+      Out.Kind = TK_String;
+      Out.VarTypeName = TypeName;
+    }
+  } else if (CanonicalType->getTypeClass() == clang::Type::TypeClass::Record)
+  {
+    if (TypeName.find("basic_string<char>") != std::string::npos) {
+      Out.Kind = TK_String;
+      Out.VarTypeName = TypeName;
+    } else {
+      Out.Kind = TK_Complex;
+      Out.VarTypeName = TypeName;
+    }
+  }
+  
+  
 }

@@ -5,7 +5,12 @@
 
 class Class2LuaScraper {
 public:
-  explicit Class2LuaScraper() : Policy(Options) {}
+  explicit Class2LuaScraper() : Policy(Options) {
+    Policy.SuppressTagKeyword = 1;
+    Policy.Bool = 1;
+    //Policy.SuppressScope = 1;
+    //Policy.adjustForCPlusPlus();
+  }
 
   const RecordsDatabase& getDatabase() const;
 
@@ -15,6 +20,7 @@ public:
   void scrapeCXXRecordDecl(clang::CXXRecordDecl *decl);
   void scrapeFieldDecl(clang::FieldDecl *decl, RecordInfo& Out);
   void scrapeSubType(clang::QualType QT);
+  void parseFieldType(clang::QualType CanonicalQT, FieldTypeInfo &Out);
 
 private:
   clang::ASTContext *Context;

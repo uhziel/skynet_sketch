@@ -28,4 +28,7 @@ int main(int argc, const char **argv) {
                  OptionsParser.getSourcePathList());
   auto Scraper = make_unique<Class2LuaScraper>();
   Tool.Run(Scraper.get());
+  const RecordsDatabase& Database = Scraper->getDatabase();
+  Database.dump();
+  return 0;
 }
