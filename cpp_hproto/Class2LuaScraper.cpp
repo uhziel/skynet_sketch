@@ -30,7 +30,7 @@ void Class2LuaScraper::scrapeTranslationUnitDecl(
       continue;
     }
 
-    scrapeCXXRecordDecl(decl);
+    scrapeCXXRecordDecl(decl, true);
   }
 }
 
@@ -46,12 +46,13 @@ void Class2LuaScraper::scrapeCXXRecordDeclContext(clang::DeclContext *DeclContex
   }
 }
 
-void Class2LuaScraper::scrapeCXXRecordDecl(clang::CXXRecordDecl *decl) {
+void Class2LuaScraper::scrapeCXXRecordDecl(clang::CXXRecordDecl *decl, bool IsRoot/* = false*/) {
   if (decl->isThisDeclarationADefinition() == VarDecl::DeclarationOnly) {
     return;
   }
 
   RecordInfo Info;
+  Info.IsRoot = IsRoot;
   Info.RecordTypeName = decl->getQualifiedNameAsString();
   if (Database.hasRecord(Info.RecordTypeName)) {
     return;
@@ -95,7 +96,7 @@ void Class2LuaScraper::scrapeSubType(QualType QT) {
   {
   case clang::Type::TypeClass::Record:
     {
-      scrapeCXXRecordDecl(type->getAsCXXRecordDecl());
+      scrapeCXXRecordDecl(type->getAsCXXRecordDecl(), false);
     }
     break;
   case clang::Type::TypeClass::TemplateSpecialization:
@@ -145,13 +146,13 @@ void Class2LuaScraper::parseFieldType(QualType CanonicalQT, FieldTypeInfo &Out) 
   {
     if (TypeName.find("char") != std::string::npos) {
       Out.Kind = TK_String;
-      Out.VarTypeName = TypeName;
+      Out.VarTypeName = "string";
     }
   } else if (CanonicalType->getTypeClass() == clang::Type::TypeClass::Record)
   {
     if (TypeName.find("basic_string<char>") != std::string::npos) {
       Out.Kind = TK_String;
-      Out.VarTypeName = TypeName;
+      Out.VarTypeName = "string";
     } else {
       Out.Kind = TK_Complex;
       Out.VarTypeName = TypeName;

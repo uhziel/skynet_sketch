@@ -4,6 +4,7 @@
 #include "llvm/Support/CommandLine.h"
 #include "Class2LuaTool.h"
 #include "Class2LuaScraper.h"
+#include "Class2LuaCodeGenerator.h"
 
 using namespace clang;
 using namespace clang::tooling;
@@ -30,5 +31,7 @@ int main(int argc, const char **argv) {
   Tool.Run(Scraper.get());
   const RecordsDatabase& Database = Scraper->getDatabase();
   Database.dump();
+  Class2LuaCodeGenerator CodeGenerator(Database);
+  CodeGenerator.generate();
   return 0;
 }

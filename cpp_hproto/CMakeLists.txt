@@ -8,6 +8,8 @@ add_clang_executable(cpp_hproto
   Class2LuaScraper.cpp
   RecordsDatabase.h
   RecordsDatabase.cpp
+  Class2LuaCodeGenerator.h
+  Class2LuaCodeGenerator.cpp
 )
 
 target_link_libraries(cpp_hproto

@@ -17,7 +17,7 @@ public:
   void setContext(clang::ASTContext *_Context);
   void scrapeTranslationUnitDecl(clang::TranslationUnitDecl *Decl);
   void scrapeCXXRecordDeclContext(clang::DeclContext *DeclContext, RecordInfo& Out);
-  void scrapeCXXRecordDecl(clang::CXXRecordDecl *decl);
+  void scrapeCXXRecordDecl(clang::CXXRecordDecl *decl, bool IsRoot = false);
   void scrapeFieldDecl(clang::FieldDecl *decl, RecordInfo& Out);
   void scrapeSubType(clang::QualType QT);
   void parseFieldType(clang::QualType CanonicalQT, FieldTypeInfo &Out);
