@@ -27,7 +27,7 @@ struct ComplexTypeInfo
 };
 
 struct ComplexTypeInfoCmp {
-bool operator() (const ComplexTypeInfo& lhs, const ComplexTypeInfo& rhs) {
+bool operator() (const ComplexTypeInfo& lhs, const ComplexTypeInfo& rhs) const {
         if (lhs.Type != rhs.Type)
             return lhs.Type < rhs.Type;
         if (lhs.VarTypeName != rhs.VarTypeName)

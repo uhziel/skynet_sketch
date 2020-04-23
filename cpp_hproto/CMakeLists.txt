@@ -10,6 +10,8 @@ add_clang_executable(cpp_hproto
   RecordsDatabase.cpp
   Class2LuaCodeGenerator.h
   Class2LuaCodeGenerator.cpp
+  ComplexFieldTypeParse.h
+  ComplexFieldTypeParse.cpp
 )
 
 target_link_libraries(cpp_hproto

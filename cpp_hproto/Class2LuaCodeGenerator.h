@@ -11,7 +11,7 @@ public:
 
 private:
   void preprocessRecord(RecordInfo& RecordInfo);
-  void preprecoessComplexField(FieldTypeInfo& FileTypeInfo);
+  void preprecoessComplexField(FieldTypeInfo& FieldTypeInfo);
   void generateRecord(const RecordInfo& RecordInfo);
   void generateRecordLencode(const RecordInfo& RecordInfo);
   void generateComplexFieldLencode(const FieldTypeInfo& FieldTypeInfo);

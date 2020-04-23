@@ -2,6 +2,7 @@
 #include "RecordsDatabase.h"
 #include "clang/Tooling/Tooling.h"
 #include <regex>
+#include "ComplexFieldTypeParse.h"
 
 //FILE
 static const char FILE_HEADER[] =
@@ -124,16 +125,8 @@ void Class2LuaCodeGenerator::preprocessRecord(RecordInfo& RecordInfo) {
   }
 }
 
-void Class2LuaCodeGenerator::preprecoessComplexField(FieldTypeInfo& FileTypeInfo) {
-  if (FileTypeInfo.VarTypeName == "BodyPart") {
-    return;
-  }
-  FileTypeInfo.VarTypeName = "array_BodyPart";
-  ComplexTypeInfo Info;
-  Info.Type = CT_Array;
-  Info.VarTypeName = "array_BodyPart";
-  Info.ChildVarTypeName1 = "BodyPart";
-  FileTypeInfo.ComplexTypeInfos.push_back(Info);
+void Class2LuaCodeGenerator::preprecoessComplexField(FieldTypeInfo& FieldTypeInfo) {
+  ComplexFieldTypeParse(FieldTypeInfo);
 }
 
 void Class2LuaCodeGenerator::generateRecord(const RecordInfo& RecordInfo) {
