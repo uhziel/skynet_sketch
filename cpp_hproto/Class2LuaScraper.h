@@ -5,7 +5,7 @@
 
 class Class2LuaScraper {
 public:
-  explicit Class2LuaScraper() : Policy(Options) {
+  explicit Class2LuaScraper(bool Verbose) : Policy(Options) {
     Policy.SuppressTagKeyword = 1;
     Policy.Bool = 1;
     //Policy.SuppressScope = 1;
@@ -27,4 +27,5 @@ private:
   clang::LangOptions Options;
   clang::PrintingPolicy Policy;
   RecordsDatabase Database;
+  bool Verbose;
 };

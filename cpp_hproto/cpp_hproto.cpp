@@ -27,10 +27,10 @@ int main(int argc, const char **argv) {
 
   Class2LuaTool Tool(OptionsParser.getCompilations(),
                  OptionsParser.getSourcePathList());
-  auto Scraper = make_unique<Class2LuaScraper>();
+  auto Scraper = make_unique<Class2LuaScraper>(false);
   Tool.Run(Scraper.get());
+
   const RecordsDatabase& Database = Scraper->getDatabase();
-  Database.dump();
   Class2LuaCodeGenerator CodeGenerator(Database);
   CodeGenerator.generate();
   return 0;

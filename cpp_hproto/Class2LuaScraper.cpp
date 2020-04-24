@@ -59,12 +59,18 @@ void Class2LuaScraper::scrapeCXXRecordDecl(clang::CXXRecordDecl *decl, bool IsRo
   }
 
   const clang::Type *type = decl->getTypeForDecl();
-  llvm::outs() << "CXXRecordDecl " << decl->getQualifiedNameAsString()
-               << " typeClass:" << type->getTypeClassName() << "\n";
-  llvm::outs() << "{\n";
+  if (Verbose) {
+    llvm::outs() << "CXXRecordDecl " << decl->getQualifiedNameAsString()
+                << " typeClass:" << type->getTypeClassName() << "\n";
+    llvm::outs() << "{\n";
+  }
+
   scrapeCXXRecordDeclContext(decl, Info);
   Database.pushInfo(Info);
-  llvm::outs() << "}\n";
+
+  if (Verbose) {
+    llvm::outs() << "}\n";
+  }
 }
 
 void Class2LuaScraper::scrapeFieldDecl(clang::FieldDecl *decl, RecordInfo& Out) {
@@ -80,7 +86,8 @@ void Class2LuaScraper::scrapeFieldDecl(clang::FieldDecl *decl, RecordInfo& Out) 
   parseFieldType(CanonicalQT, Info);
   Out.TypeInfos.push_back(Info);
 
-  llvm::outs() << "FieldDecl " << decl->getNameAsString()
+  if (Verbose) {
+    llvm::outs() << "FieldDecl " << decl->getNameAsString()
                << " typeClass:(" << type->getTypeClass() << ","
                << type->getTypeClassName()
                << " type:" << QualType::getAsString(qual_type.split(), Policy)
@@ -88,6 +95,7 @@ void Class2LuaScraper::scrapeFieldDecl(clang::FieldDecl *decl, RecordInfo& Out) 
                << CanonicalType->getTypeClassName()
                << " type:" << QualType::getAsString(CanonicalQT.split(), Policy)
                << ")\n";
+  }
 }
 
 void Class2LuaScraper::scrapeSubType(QualType QT) {
@@ -117,8 +125,6 @@ void Class2LuaScraper::scrapeSubType(QualType QT) {
     {
       const clang::TypedefType *TT = type->getAs<clang::TypedefType>();
       QualType DesugarQT = TT->desugar();
-      llvm::outs() << "scrapeSubType Typedef origin:" << QualType::getAsString(QT.split(), Policy)
-        << " -> desugar:" << QualType::getAsString(DesugarQT.split(), Policy) << "\n";
       scrapeSubType(DesugarQT);
     }
     break;
@@ -126,8 +132,6 @@ void Class2LuaScraper::scrapeSubType(QualType QT) {
     {
       const clang::ElaboratedType *ET = type->getAs<clang::ElaboratedType>();
       QualType DesugarQT = ET->desugar();
-      llvm::outs() << "scrapeSubType Elaborated origin:" << QualType::getAsString(QT.split(), Policy)
-        << " -> desugar:" << QualType::getAsString(DesugarQT.split(), Policy) << "\n";
       scrapeSubType(DesugarQT);
     }
     break;
@@ -142,14 +146,12 @@ void Class2LuaScraper::parseFieldType(QualType CanonicalQT, FieldTypeInfo &Out) 
   if (CanonicalType->getTypeClass() == clang::Type::TypeClass::Builtin) {
     Out.Kind = TK_Builtin;
     Out.VarTypeName = TypeName;
-  } else if (CanonicalType->getTypeClass() == clang::Type::TypeClass::ConstantArray)
-  {
+  } else if (CanonicalType->getTypeClass() == clang::Type::TypeClass::ConstantArray) {
     if (TypeName.find("char") != std::string::npos) {
       Out.Kind = TK_String;
       Out.VarTypeName = "string";
     }
-  } else if (CanonicalType->getTypeClass() == clang::Type::TypeClass::Record)
-  {
+  } else if (CanonicalType->getTypeClass() == clang::Type::TypeClass::Record) {
     if (TypeName.find("basic_string<char>") != std::string::npos) {
       Out.Kind = TK_String;
       Out.VarTypeName = "string";
@@ -158,6 +160,4 @@ void Class2LuaScraper::parseFieldType(QualType CanonicalQT, FieldTypeInfo &Out) 
       Out.VarTypeName = TypeName;
     }
   }
-  
-  
 }
