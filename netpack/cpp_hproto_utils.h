@@ -35,6 +35,11 @@ struct ReadStream
 void lencode_int(lua_State *L, int index, const char *key, Stream *stream);
 void ldecode_int(lua_State *L, const char *key, ReadStream *stream);
 
+void lencode_unsigned_int(lua_State *L, int index, const char *key, Stream *stream);
+void ldecode_unsigned_int(lua_State *L, const char *key, ReadStream *stream);
+void lencode_unsigned_int(lua_State *L, int index, Stream *stream);
+void ldecode_unsigned_int(lua_State *L, ReadStream *stream);
+
 short lencode_short(lua_State *L, int index, const char *key, Stream *stream);
 short ldecode_short(lua_State *L, const char *key, ReadStream *stream);
 

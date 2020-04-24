@@ -21,16 +21,10 @@ lencode_ev(lua_State *L, int index, Stream *stream) {
     }
 
     if (id == CLSID_CEventQueryCommonCredit) {
-        lencode_long(L, index, "m_trans_id", stream);
-        lencode_long(L, index, "m_account_id", stream);
-        lencode_string(L, index, "m_client_ip", stream);
+        lencode_CEventQueryCommonCredit(L, index, stream);
         return 0;
     } else if (id == CLSID_CEventQueryCommonCreditRes) {
-        lencode_long(L, index, "m_trans_id", stream);
-        lencode_long(L, index, "m_account_id", stream);
-        lencode_int(L, index, "m_result", stream);
-        lencode_int(L, index, "m_tag_black_level", stream);
-        lencode_int(L, index, "m_common_credit_score", stream);
+        lencode_CEventQueryCommonCreditRes(L, index, stream);
         return 0;
     } else if (id == NET_PING) {
         lencode_int(L, index, "m_tick", stream);
@@ -40,7 +34,7 @@ lencode_ev(lua_State *L, int index, Stream *stream) {
         lencode_int(L, index, "m_tick", stream);
         return 0;
     } else if (id == CLSID_Human) {
-        lencode_Human(L, index, stream);
+        lencode_CEventHuman(L, index, stream);
         return 0;
     }
     else {
@@ -58,16 +52,10 @@ ldecode_ev(lua_State *L, ReadStream* stream) {
     }
 
     if (id == CLSID_CEventQueryCommonCredit) {
-        ldecode_long(L, "m_trans_id", stream);
-        ldecode_long(L, "m_account_id", stream);
-        ldecode_string(L, "m_client_ip", stream);
+        ldecode_CEventQueryCommonCredit(L, stream);
         return 0;
     } else if (id == CLSID_CEventQueryCommonCreditRes) {
-        ldecode_long(L, "m_trans_id", stream);
-        ldecode_long(L, "m_account_id", stream);
-        ldecode_int(L, "m_result", stream);
-        ldecode_int(L, "m_tag_black_level", stream);
-        ldecode_int(L, "m_common_credit_score", stream);
+        ldecode_CEventQueryCommonCreditRes(L, stream);
         return 0;   
     } else if (id == CLSID_CEventThemeChatGMDestory) {
         ldecode_string(L, "m_name", stream);
@@ -81,7 +69,7 @@ ldecode_ev(lua_State *L, ReadStream* stream) {
         ldecode_int(L, "m_tick", stream);
         return 0;
     } else if (id == CLSID_Human) {
-        ldecode_Human(L, stream);
+        ldecode_CEventHuman(L, stream);
         return 0;
     }
     else

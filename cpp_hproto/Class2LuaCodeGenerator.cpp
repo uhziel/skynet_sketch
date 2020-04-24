@@ -53,13 +53,11 @@ static const char RECORD_LDECODE_NOT_ROOT_FOOTER[] =
 "}\n"
 "\n";
 
+
 //ARRAY_LENCODE
 static const char ARRAY_LENCODE[] =
 "static void\n"
-"lencode_%s(lua_State *L, int index, const char* key, Stream *stream) {\n"
-"    lua_pushstring(L, key);\n"
-"    lua_gettable(L, index);\n"
-"\n"
+"lencode_%s(lua_State *L, int index, Stream *stream) {\n"
 "    lua_Integer size = 0;\n"
 "    if (lua_istable(L, -1))\n"
 "    {\n"
@@ -77,6 +75,14 @@ static const char ARRAY_LENCODE[] =
 "\n"
 "        lua_pop(L, 1);\n"
 "    }\n"
+"}\n"
+"\n"
+"static void\n"
+"lencode_%s(lua_State *L, int index, const char* key, Stream *stream) {\n"
+"    lua_pushstring(L, key);\n"
+"    lua_gettable(L, index);\n"
+"\n"
+"    lencode_%s(L, index, stream);\n"
 "\n"
 "    lua_pop(L, 1);\n"
 "}\n"
@@ -85,11 +91,10 @@ static const char ARRAY_LENCODE[] =
 //ARRAY_LDECODE
 static const char ARRAY_LDECODE[] =
 "static void\n"
-"ldecode_%s(lua_State *L, const char* key, ReadStream *stream) {\n"
+"ldecode_%s(lua_State *L, ReadStream *stream) {\n"
 "    lua_Integer size = 0;\n"
 "    stream->Read(&size, sizeof(size));\n"
 "\n"
-"    lua_pushstring(L, key);\n"
 "    lua_createtable(L, size, 0);\n"
 "    for (lua_Integer i = 1; i <= size; i++) {\n"
 "        lua_pushinteger(L, i);\n"
@@ -97,7 +102,14 @@ static const char ARRAY_LDECODE[] =
 "        ldecode_%s(L, stream);\n"
 "        \n"
 "        lua_settable(L, -3);\n"
-"    }    \n"
+"    }\n"
+"}\n"
+"\n"
+"static void\n"
+"ldecode_%s(lua_State *L, const char* key, ReadStream *stream) {\n"
+"    lua_pushstring(L, key);\n"
+"\n"
+"    ldecode_%s(L, stream); \n"
 "\n"
 "    lua_settable(L, -3);\n"
 "}\n"
@@ -169,7 +181,12 @@ void Class2LuaCodeGenerator::generateComplexTypeInfoLencode(const ComplexTypeInf
   GenedLencodeComplexTypeInfos.insert(ComplexTypeInfo);
 
   if (ComplexTypeInfo.Type == CT_Array) {
-    llvm::outs() << llvm::format(ARRAY_LENCODE, ComplexTypeInfo.VarTypeName.c_str(), ComplexTypeInfo.ChildVarTypeName1.c_str());
+    llvm::outs() << llvm::format(ARRAY_LENCODE,
+      ComplexTypeInfo.VarTypeName.c_str(),
+      ComplexTypeInfo.ChildVarTypeName1.c_str(),
+      ComplexTypeInfo.VarTypeName.c_str(),
+      ComplexTypeInfo.VarTypeName.c_str()
+      );
   }
 }
 
@@ -211,6 +228,10 @@ void Class2LuaCodeGenerator::generateComplexTypeInfoLdecode(const ComplexTypeInf
   GenedLdecodeComplexTypeInfos.insert(ComplexTypeInfo);
 
   if (ComplexTypeInfo.Type == CT_Array) {
-    llvm::outs() << llvm::format(ARRAY_LDECODE, ComplexTypeInfo.VarTypeName.c_str(), ComplexTypeInfo.ChildVarTypeName1.c_str());
+    llvm::outs() << llvm::format(ARRAY_LDECODE,
+      ComplexTypeInfo.VarTypeName.c_str(),
+      ComplexTypeInfo.ChildVarTypeName1.c_str(),
+      ComplexTypeInfo.VarTypeName.c_str(),
+      ComplexTypeInfo.VarTypeName.c_str());
   }
 }

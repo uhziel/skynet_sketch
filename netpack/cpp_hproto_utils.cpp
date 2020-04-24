@@ -58,6 +58,36 @@ void ldecode_int(lua_State *L, const char *key, ReadStream *stream)
     lua_settable(L, -3);
 }
 
+void lencode_unsigned_int(lua_State *L, int index, Stream *stream)
+{
+    unsigned int v = (unsigned int)lua_tointeger(L, -1); //write
+    stream->Copy(&v, sizeof(v));
+}
+
+void lencode_unsigned_int(lua_State *L, int index, const char *key, Stream *stream)
+{
+    lua_pushstring(L, key);
+    lua_gettable(L, index);
+
+    lencode_unsigned_int(L, index, stream);
+}
+
+void ldecode_unsigned_int(lua_State *L, const char *key, ReadStream *stream)
+{
+    lua_pushstring(L, key);
+
+    ldecode_unsigned_int(L, stream);
+
+    lua_settable(L, -3);
+}
+
+void ldecode_unsigned_int(lua_State *L, ReadStream *stream)
+{
+    unsigned int v = 0;
+    stream->Read(&v, sizeof(v));
+    lua_pushinteger(L, v);
+}
+
 short lencode_short(lua_State *L, int index, const char *key, Stream *stream)
 {
     lua_pushstring(L, key);
