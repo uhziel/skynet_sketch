@@ -3,7 +3,7 @@
 using namespace clang;
 using namespace llvm;
 
-const std::string FILTER_KEY = "Hum";
+const std::string FILTER_KEY = "CEvent";
 
 const RecordsDatabase &Class2LuaScraper::getDatabase() const { return Database; }
 
