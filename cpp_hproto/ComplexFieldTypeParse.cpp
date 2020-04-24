@@ -1,5 +1,6 @@
 #include "ComplexFieldTypeParse.h"
 #include "RecordsDatabase.h"
+#include <regex>
 
 enum AtomKind {
   AK_Array,
@@ -9,21 +10,51 @@ enum AtomKind {
 
 struct ComplexAtomInfo {
 public:
-  ComplexAtomInfo(AtomKind _Kind, const std::string& _RecordName)
-    : Kind(_Kind)
-    , RecordName(_RecordName)
+  ComplexAtomInfo(AtomKind Kind)
+    : Kind(Kind)
+  {}
+  ComplexAtomInfo(AtomKind Kind, const std::string& RecordName)
+    : Kind(Kind)
+    , RecordName(RecordName)
   {}
 
   AtomKind Kind;
   std::string RecordName;
 };
 
+static void _SpiltTemplateParam(const std::string &TemplateParamStr,
+  std::vector<std::string>& TemplateParams)
+{
+  int LeftArrayNum = 0;
+  std::string::const_iterator LastStartCitr = TemplateParamStr.begin();
+  for (std::string::const_iterator citr = TemplateParamStr.begin();
+    citr != TemplateParamStr.end(); citr++)
+  {
+    if (*citr == '<') {
+      LeftArrayNum += 1;
+    } else if (*citr == '>') {
+      LeftArrayNum -= 1;
+    }
+    
+    if (LeftArrayNum == 0 && *citr == ',') {
+      std::string TemplateParam(LastStartCitr, citr);
+      TemplateParams.push_back(TemplateParam);
+      if (citr+1 == TemplateParamStr.end()) {
+        return;
+      } else {
+        LastStartCitr = citr + 1;
+      }
+    }
+  }
+}
+
 static void _ComplexVarTypeNameParse(const std::string &VarTypeName,
   std::vector<ComplexAtomInfo> &Out) {
   size_t LeftArrowPos = VarTypeName.find_first_of("<");
   size_t RightArrowPos = VarTypeName.find_last_of(">");
   if (LeftArrowPos == std::string::npos || RightArrowPos == std::string::npos) {
-    ComplexAtomInfo Info(AK_Record, VarTypeName);
+    ComplexAtomInfo Info(AK_Record);
+    Info.RecordName = std::regex_replace(VarTypeName, std::regex(" "), "_");
     Out.push_back(Info);
     return;
   }
@@ -32,17 +63,20 @@ static void _ComplexVarTypeNameParse(const std::string &VarTypeName,
   if (Header.find("vector") != std::string::npos ||
     Header.find("set") != std::string::npos ||
     Header.find("queue") != std::string::npos) {
-    size_t Pos = VarTypeName.find_first_of(",", LeftArrowPos);
-    if (Pos != std::string::npos) {
+    std::string TemplateParamStr = VarTypeName.substr(LeftArrowPos+1, RightArrowPos-LeftArrowPos-1);
+    std::vector<std::string> TemplateParams;
+    _SpiltTemplateParam(TemplateParamStr, TemplateParams);
+    if (!TemplateParams.empty()) {
       ComplexAtomInfo Info(AK_Array, "array");
       Out.push_back(Info);
-      _ComplexVarTypeNameParse(VarTypeName.substr(LeftArrowPos+1, Pos-LeftArrowPos-1), Out);
-      return;      
+      _ComplexVarTypeNameParse(TemplateParams[0], Out);
+      return;       
     }
   }
   //TODO else if map
 
-  ComplexAtomInfo Info(AK_Record, VarTypeName);
+  ComplexAtomInfo Info(AK_Record);
+  Info.RecordName = std::regex_replace(VarTypeName, std::regex(" "), "_");
   Out.push_back(Info);
   return;  
 }
@@ -72,11 +106,12 @@ void ComplexFieldTypeParse(FieldTypeInfo &Out) {
       continue;
     }
     Info.VarTypeName = VarTypeNameIndex[i];
-    Info.ChildVarTypeName1 = VarTypeNameIndex[i-1];
+    Info.ChildVarTypeName1 = VarTypeNameIndex[i+1];
     Out.ComplexTypeInfos.push_back(Info);
   }
   
   if (!Out.ComplexTypeInfos.empty()) {
     Out.VarTypeName = Out.ComplexTypeInfos[0].VarTypeName;
   }
+  std::reverse(Out.ComplexTypeInfos.begin(), Out.ComplexTypeInfos.end());
 }

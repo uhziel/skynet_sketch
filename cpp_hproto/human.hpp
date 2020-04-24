@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <set>
 
 using namespace std;
 
@@ -21,7 +22,8 @@ struct BodyPart
     float weight;
 };
 
-struct Human;
+struct Human; // skip
+int foobar;  // skip
 
 typedef BodyPart Foo;
 typedef std::vector<BodyPart> BodyPartVec;
@@ -35,8 +37,8 @@ struct Human {
     char name[MAX_NAME_LENGTH];
     std::string description;
     std::vector<::BodyPart> parts;
-    BodyPartVec parts2;
-    //struct ::BodyPart part1;
-    Foo part1;
+    Foo test_part1;
+    BodyPartVec test_parts2;
+    std::vector<std::set<unsigned int>> test_tmp1;
+    std::vector<std::set<BodyPart>> test_tmp2;
 };
-int foobar;
