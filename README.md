@@ -53,7 +53,7 @@ start load_test count:2 duration:1 interval:1
 # {"ret":0, "data":{"mtime":123456, "score":552, "level":1}}
 ```
 
-# cpp_hproto 消息协议解析代码生成
+# cpp_hproto - 消息协议代码生成工具
 cpp_hproto 是个帮助把头文件中定义的消息转化成解析成lua对象的代码。
 
 它利用 LLVM clang 的 AST(抽象语法树)来刮削出头文件中我们关心的信息(先找到包含CEvent的结构体/类，再找成员变量中使用的结构体/类，这么递归下去)，再利用这个信息生成解析代码。
@@ -61,7 +61,7 @@ cpp_hproto 是个帮助把头文件中定义的消息转化成解析成lua对象
 ## 开发环境布置
 
 ``` bash
-# 开发环境：mac os x 10.14.6
+# 机器：mac os x 10.14.6
 $ git clone https://github.com/llvm/llvm-project.git # 可能会非常慢，请耐心等待
 $ cd llvm-project
 $ git checkout origin/release/9.x # 切换到 9.x 分支
@@ -76,9 +76,9 @@ $ ./bin/cpp_hproto --version
 
 ```
 
-## 演示转换
+## 演示生成
 
 ``` bash
-$ ./bin/cpp_hproto ../../skynet_sketch/netpack/example_events_header.h
-
+$ ./bin/cpp_hproto ../../skynet_sketch/netpack/example_events_header.h > ../../skynet_sketch/netpack/generated_hproto.h
+$ less ../../skynet_sketch/netpack/generated_hproto.h
 ```
