@@ -20,8 +20,11 @@ function CMD.query(ev)
     res_ev.m_id = 26043 -- CLSID_CEventQueryCommonCreditRes
     res_ev.m_flags = 0
 
-    local status, body = httpc.get(host, uri)
-    if status ~= 200 then
+    local ret, status, body = pcall(httpc.get, host, uri)
+    if not ret then
+        --skynet.error(status)
+        res_ev.m_result = 1
+    elseif status ~= 200 then
         res_ev.m_result = 1
     else
         --skynet.error("body:", body)

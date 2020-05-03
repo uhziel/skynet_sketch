@@ -58,7 +58,7 @@ cpp_hproto 是个帮助把头文件中定义的消息转化成解析成lua对象
 
 它利用 LLVM clang 的 AST(抽象语法树)来刮削出头文件中我们关心的信息(先找到包含CEvent的结构体/类，再找成员变量中使用的结构体/类，这么递归下去)，再利用这个信息生成解析代码。
 
-## 开发环境布置
+## 1 开发环境布置
 
 ``` bash
 # 机器：mac os x 10.14.6
@@ -76,7 +76,7 @@ $ ./bin/cpp_hproto --version
 
 ```
 
-## 演示生成
+## 2 演示生成
 
 ``` bash
 $ ./bin/cpp_hproto ../../skynet_sketch/netpack/example_events_header.h > ../../skynet_sketch/netpack/generated_hproto.h
