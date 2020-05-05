@@ -253,7 +253,7 @@ filter_data_(lua_State *L, int fd, uint8_t * buffer, int size) {
 			if (uc->read > -SIZEOF_LENGTH) {
 				return 1;
 			}
-			uc->pack.size = uc->header;
+			uc->pack.size = uc->header + SIZEOF_LENGTH;
 			uc->pack.buffer = skynet_malloc(uc->header);
 			uc->read = 0;
 		}

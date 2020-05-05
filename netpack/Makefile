@@ -39,7 +39,7 @@ hproto.so: hproto.cpp cpp_hproto_utils.cpp
 	$(CCP) $(CCPFLAGS) $(SHARED) $^ -o $@
 
 webclient.so: webclient.c
-	$(CC) $(CFLAGS) $(SHARED) -lcurl $^ -o $@
+	$(CC) $(CFLAGS) $(SHARED) $^ -o $@ -lcurl
 
 clean:
 	rm netpackh5.so netpackx51.so hproto.so webclient.so
