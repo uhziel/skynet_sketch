@@ -191,9 +191,9 @@ static inline int
 write_uncomplete_tmp_header(struct uncomplete * uc, uint8_t *buffer, int size)
 {
 	int old_read = uc->read;
-	for (size_t i = -old_read; i < size; i++) {
+	for (size_t i = 0; i < size; i++) {
+		uc->header |= (*(buffer+i)) << (8 * -(uc->read));
 		uc->read -= 1;
-		uc->header |= (*(buffer+i)) << (8 * i);
 		if (uc->read == -SIZEOF_LENGTH) {
 			break;
 		}
@@ -462,7 +462,7 @@ lpack(lua_State *L) {
 	}
 	*/
 
-	uint8_t * buffer = skynet_malloc(len);
+	uint8_t * buffer = skynet_malloc(len + SIZEOF_LENGTH);
 	write_size(buffer, len);
 	memcpy(buffer+SIZEOF_LENGTH, ptr, len);
 

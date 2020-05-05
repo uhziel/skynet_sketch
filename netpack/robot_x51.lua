@@ -1,6 +1,6 @@
 local skynet = require "skynet"
 local socket = require "skynet.socket"
-local netpack = require "skynet.netpack"
+local netpack = require "netpackx51"
 local hproto = require "hproto"
 local cmdproto = require "cmdproto"
 
@@ -77,15 +77,15 @@ end
 
 local function unpack_package(text)
 	local size = #text
-	if size < 2 then
+	if size < 4 then
 		return nil, text
 	end
-	local s = text:byte(2) + text:byte(1) * 256
-	if size < s+2 then
+	local s = text:byte(1) + text:byte(2) * 256 + text:byte(3) * (2^16) + text:byte(4) * (2^24)
+	if size < s+8 then
 		return nil, text
 	end
 
-	return text:sub(3,2+s), text:sub(3+s)
+	return text:sub(5,8+s), text:sub(9+s)
 end
 
 local function recv_package(last)

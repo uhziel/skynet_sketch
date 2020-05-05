@@ -1,5 +1,5 @@
 local skynet = require "skynet"
-local netpack = require "skynet.netpack"
+local netpack = require "netpackx51"
 local socketdriver = require "skynet.socketdriver"
 
 local gateserver = {}
