@@ -27,7 +27,7 @@ CCPFLAGS = -std=c++11 -g -O0 -Wall -I$(LUA_INC)
 linux macosx:
 	$(MAKE) all PLAT=$@ SHARED="$(SHARED)" CC="$(CC)" CCP="$(CCP)" CFLAGS="$(CFLAGS)"
 
-all: netpackh5.so netpackx51.so hproto.so
+all: netpackh5.so netpackx51.so hproto.so webclient.so
 
 netpackx51.so: lua-netpackx51.c
 	$(CC) $(CFLAGS) $(SHARED) $^ -o $@ -I../skynet/skynet-src
@@ -38,5 +38,8 @@ netpackh5.so: lua-netpackh5.c
 hproto.so: hproto.cpp cpp_hproto_utils.cpp
 	$(CCP) $(CCPFLAGS) $(SHARED) $^ -o $@
 
+webclient.so: webclient.c
+	$(CC) $(CFLAGS) $(SHARED) -lcurl $^ -o $@
+
 clean:
-	rm netpackh5.so netpackx51.so hproto.so
+	rm netpackh5.so netpackx51.so hproto.so webclient.so

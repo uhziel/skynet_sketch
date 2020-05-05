@@ -6,11 +6,15 @@ local CMD = {}
 
 local host
 local uri = "/cgi-bin/auth/query_common_credit"
+local url
+local webclientd
 
 skynet.init(function()
     httpc.timeout=100
     httpc.dns()
     host = skynet.getenv("ccx_host")
+    url = host..uri
+    webclientd = skynet.uniqueservice("webclientd")
 end)
 
 function CMD.query(ev)
@@ -20,11 +24,9 @@ function CMD.query(ev)
     res_ev.m_id = 26043 -- CLSID_CEventQueryCommonCreditRes
     res_ev.m_flags = 0
 
-    local ret, status, body = pcall(httpc.get, host, uri)
+    local ret, body = skynet.call(webclientd, "lua", "request", url, {uin=ev.m_account_id, client_ip=ev.m_client_ip})
     if not ret then
         --skynet.error(status)
-        res_ev.m_result = 1
-    elseif status ~= 200 then
         res_ev.m_result = 1
     else
         --skynet.error("body:", body)

@@ -153,6 +153,7 @@ local function load_test(count, duration, interval)
         load_test_once(count)
         skynet.sleep(interval*100)
 	end
+	skynet.sleep(500)
     skynet.error("end load_test request_count:", session, " succ_count:", recv_succ_count, " fail_count:", recv_fail_count)
     skynet.exit()
 end
