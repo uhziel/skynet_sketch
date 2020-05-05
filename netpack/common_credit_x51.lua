@@ -26,7 +26,8 @@ function CMD.query(ev)
 
     local ret, body = skynet.call(webclientd, "lua", "request", url, {uin=ev.m_account_id, client_ip=ev.m_client_ip})
     if not ret then
-        --skynet.error(status)
+        --skynet.error(body)
+
         res_ev.m_result = 1
     else
         --skynet.error("body:", body)
