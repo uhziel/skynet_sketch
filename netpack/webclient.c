@@ -87,8 +87,8 @@ static void webclient_global_cleanup()
 static int webclient_create(lua_State* l)
 {
     curl_version_info_data* data = curl_version_info(CURLVERSION_NOW);
-    if (data->version_num < 0x070F04)
-        return luaL_error(l, "requires 7.15.4 or higher curl, current version is %s", data->version);
+    if (data->version_num < 0x071e00)
+        return luaL_error(l, "requires 7.30.0 or higher curl, current version is %s", data->version);
 
     webclient_global_init();
     CURLM* curlm = curl_multi_init();
@@ -100,6 +100,11 @@ static int webclient_create(lua_State* l)
     struct webclient* webclient = (struct webclient*)lua_newuserdata(l, sizeof(*webclient));
     webclient->curlm = curlm;
     webclient->encoding_curl = NULL;
+
+    lua_Number max_total_connections = lua_tonumber(l, 1);
+
+    curl_multi_setopt(curlm, CURLMOPT_PIPELINING, 1);
+    curl_multi_setopt(curlm, CURLMOPT_MAX_TOTAL_CONNECTIONS, max_total_connections);
 
     luaL_getmetatable(l, LUA_WEB_CLIENT_MT);
     lua_setmetatable(l, -2);

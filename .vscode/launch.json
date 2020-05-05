@@ -15,7 +15,6 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/skynet",
             "environment": [],
-            "externalConsole": true,
             "MIMode": "lldb"
         },
         {

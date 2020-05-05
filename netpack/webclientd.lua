@@ -5,7 +5,7 @@
 
 local skynet = require "skynet"
 local webclientlib = require "webclient"
-local webclient = webclientlib.create()
+local webclient = webclientlib.create(50)
 local requests = nil
 
 local function resopnd(request, result)
@@ -19,6 +19,7 @@ local function resopnd(request, result)
     if result == 0 then
         request.response(true, true, content, info)
     else
+        --skynet.error(" webclientd CURLcode:", result)
         request.response(true, false, errmsg, info)
     end
 end
@@ -74,11 +75,12 @@ local function request(url, get, post, no_reply)
         post = table.concat(data , "&")
     end   
 
-    local req, key = webclient:request(url, post)
+    local req, key = webclient:request(url, post, 1000)
     if not req then
         return skynet.ret()
     end
     assert(key)
+    --webclient:debug(req, true)
 
     local response = nil
     if not no_reply then
